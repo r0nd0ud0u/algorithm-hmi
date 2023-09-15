@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PathFinderPanel</class>
+ <widget class="QWidget" name="PathFinderPanel">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_algorithm">
+     <item>
+      <widget class="QLabel" name="lbl_algo">
+       <property name="text">
+        <string>Algorithm</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="algo_combobox"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_Mode">
+     <item>
+      <widget class="QLabel" name="lbl_mode">
+       <property name="text">
+        <string>Mode</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="radioButton_work">
+       <property name="text">
+        <string>work</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="radioButton_edit">
+       <property name="text">
+        <string>edit</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_width">
+     <item>
+      <widget class="QLabel" name="lbl_width">
+       <property name="text">
+        <string>Width</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="spinBox_width">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="value">
+        <number>4</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_height">
+     <item>
+      <widget class="QLabel" name="lbl_height">
+       <property name="text">
+        <string>Height</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="spinBox_height">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="value">
+        <number>4</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

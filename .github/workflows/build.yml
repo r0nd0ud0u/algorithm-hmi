@@ -1,0 +1,98 @@
+name: Qt C++ Build
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/build.yml"
+      - "app/**"
+      - "submodules/**"
+    pull_request:
+        types: [opened, synchronize, reopened]
+
+# Env variables
+env:
+  BUILD_TYPE: Release
+  SONAR_SCANNER_VERSION: 4.7.0.2747
+  SONAR_SERVER_URL: "https://sonarcloud.io"
+  BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
+  GTEST_OUTPUT: xml:results\output.xml
+
+jobs:
+  # Build for windows and mac (without sonar scanner)
+  build-win-mac:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: "Windows (build)"
+            os: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+      - name: Install Conan
+        run: pip install conan pytest && conan --version
+      - name: Configure profile Conan
+        run: |
+            mkdir build_conan/Release
+            cd build_conan/Release
+            conan profile new release --detect
+            conan install .. -pr=release --build=missing
+                
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.13.2
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          export WORKSPACE_PATH=$(echo "${{runner.workspace}}" | sed 's/\\/\//g')
+          cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Download and set up sonar-scanner
+        env:
+          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-windows.zip
+        run: |
+          New-Item -Force -ItemType directory -Path $HOME\.sonar
+          curl -sSLo $HOME\.sonar\sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
+          unzip -o $HOME\.sonar\sonar-scanner.zip -d $HOME\.sonar\
+          echo "$HOME\.sonar\sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-windows\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+      - name: Download and set up build-wrapper
+        env:
+          BUILD_WRAPPER_DOWNLOAD_URL: ${{ env.SONAR_SERVER_URL }}/static/cpp/build-wrapper-win-x86.zip
+        run: |
+          curl -sSLo $HOME\.sonar\build-wrapper.zip ${{ env.BUILD_WRAPPER_DOWNLOAD_URL }}
+          unzip -o $HOME\.sonar\build-wrapper.zip -d $HOME\.sonar\
+          echo "$HOME\.sonar\build-wrapper-win-x86" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+      - name: Run build-wrapper
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build . --config ${{ env.BUILD_TYPE }}
+      - name: Run sonar-scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.build-wrapper-output="${{runner.workspace}}/build/${{ env.BUILD_WRAPPER_OUT_DIR }}"
+#      - name: run tests
+ #       run: |
+  #        ${{runner.workspace}}/build/bin/tests.exe    
+   #   - name: Parse xml output
+     #   run: |
+      #    python 'scripts\parse_xml_unittest.py' -xml_file 'results\output.xml'
