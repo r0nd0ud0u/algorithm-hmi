@@ -1,3 +1,4 @@
+#!/bin/bash
 cd ../build_conan
 mkdir Release
 mkdir Debug

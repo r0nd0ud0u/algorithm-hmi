@@ -5,3 +5,5 @@
 /build_conan/debug/*
 /build-qt_template-Desktop_Qt_5_15_2_MSVC2019_64bit-RelWithDebInfo/*
 /CMakeLists.txt.user
+
+/build/*
